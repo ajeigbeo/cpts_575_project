@@ -1,0 +1,36 @@
+```{r }
+#Required Packages
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(leaflet)
+library(rbokeh)
+```
+
+```{r}
+#import dataset from my Downloads 
+ncbi <- read.csv("~/Downloads/CountSeq.csv")
+long_lat <- read.csv("~/Downloads/countries.csv")
+
+
+
+#longitude and latitude
+mapdata <- left_join(long_lat, ncbi, by="region") 
+
+#remove NA values after merging
+mapdata1 <- mapdata %>%
+  filter(!is.na(mapdata$SequenceCount))
+
+mapdata1 <- mapdata1 %>% mutate(popup_info = paste(region, "</br>", SequenceCount))
+colors <- c("black", "red")
+pal <- colorFactor(colors, mapdata1$count)
+
+  mapdata1 %>%
+  leaflet()%>% 
+  addTiles() %>% 
+  addCircleMarkers (data = mapdata1, 
+                    lat = ~Latitude, 
+                    lng = ~Longitude, 
+                    radius = -2,
+                    popup = ~popup_info, color = ~pal(SequenceCount))
+```
